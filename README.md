@@ -1,37 +1,53 @@
-# Luma Technical Interview
+# Luma Prioritizer
+This algorithm let's you generate a list of patients for appointment based on their past behavioral data. The fields considered in each of the instance of the patient record are age, location, acceptedOffers, canceledOffers and averageReplyTime.
 
-## Problem Definition
+To get the desired result
+1. The data set is refined by a method called refineData, so as to exclude record instances that have missing fields such as averageReplyTime.
+2. scoreAll is used to score each record instance that has all the fields required in the model. The scoreAll method individually calls methods such as scoreByAverageReplyTime, scoreByAge, scoreByLocation and scoreByAcceptedOffers, the resulting values from each of these methods sum up to 100% which is then converted to a score ranging from 1 t0 10.
+3. arrange method is called with an argument of desc which means descending order, this method sort patient records in descending order, this means patients with great scores are at the top of the list.
+4. Items collected by the refineData method in step 1 are randomly inserted into the resulting list of patients in step 3 with the help of a method called includePatientsWithIncompleteData .
 
-A busy hospital has a list of patients waiting to see a doctor. The waitlist is created sequentially (e.g. patients are added in a fifo order) from the time the patient calls.  Once there is an availability, the front desk calls each patient to offer the appointment in the order they were added to the waitlist. The staff member from the front desk has noticed that she wastes a lot of time trying to find a patient from the waitlist since they&#39;re often not available, don&#39;t pick up the phone, etc.  She would like to generate a better list that will increase her chances of finding a patient in the first few calls.
 
-## Interview Task
+### To run the algorithm
 
-Given patient demographics and behavioral data (see sample-data/patients.json), create an algorithm that will process a set of historical patient data and compute a score for each patient that (1 as the lowest, 10 as the highest) that represents the chance of a patient accepting the offer off the waitlist. Take in consideration that patients who have little behavior data should be randomly added to the top list as to give them a chance to be selected. Expose an api that takes a facility's location as input and returns an ordered list of 10 patients who will most likely accept the appointment offer.
+Clone the Repo ```git clone https://github.com/VictorMaria/luma-prioritizer.git```
 
-## Weighting Categories
+Navigate into the directory ```cd luma-prioritizer```
 
-Demographic
+Install dependences ```npm install``
 
-- age  (weighted 10%)
-- distance to practice (weighted 10%)
+Run tests ```npm test```
 
-Behavior
+Run the build ```npm run build```
 
-- number of accepted offers (weighted 30%)
-- number of cancelled offers (weighted 30%)
-- reply time (how long it took for patients to reply) (weighted 20%)
+In the root directory of the repo, locate playground.ts file which already has Prioritizer class imported
+You can uncomment the sample code and run ```npm run play``` or instantiate Prioritizer class with your own arguments, call
+startPipeline method on the instance and run ```npm run play``` on the terminal to see the output.
 
-## Patient Model
+```
+const result = new Prioritizer(patientData, '-63.1150', '46.7110', 'averageReplyTime');
+console.log(result.startPipeline());
 
-- ID
-- Age (in years)
-- location
-  - Lat
-  - long
-- acceptedOffers (integer)
-- canceledOffers (integer)
-- averageReplyTime (integer, in seconds)
+Sample of an instance from the final output
 
-## Deliverables
+{
+    id: '174d1896-7da4-438a-8a85-e620a5f893bb',
+    name: 'Maxime Emard',
+    location: { latitude: '-75.9576', longitude: '-114.3718' },
+    age: 77,
+    acceptedOffers: 44,
+    canceledOffers: 18,
+    averageReplyTime: 1490,
+    finalScore: 7.658064516129034
+}
 
-The code should be written as a Node.js as a library that anyone can import and use. It should contain documentation and unit tests that show your understanding of the problem. Once you&#39;re finished, submit a PR to this repo.
+```
+
+
+You can also call the individual methods on an instance of prioritizer to play around.
+startPipeline method is just a method that calls other methods in a certain order to ensure the correct data is generated.
+
+
+### distanceInKMBetweenTwoCoorindates method in the Utility class
+It should be noted that this method calcuates the shortest distance between two coordinates and it does not take into consideration the additional distance the possible route between the coordinates may introduce.
+    
